@@ -23,31 +23,31 @@ module "eks" {
   create_cloudwatch_log_group            = true
   cloudwatch_log_group_retention_in_days = var.cluster_log_retention_days
 
-  vpc_id                     = var.vpc_id
-  subnet_ids                 = var.private_subnet_ids
-  control_plane_subnet_ids   = var.private_subnet_ids
+  vpc_id                                = var.vpc_id
+  subnet_ids                            = var.private_subnet_ids
+  control_plane_subnet_ids              = var.private_subnet_ids
   cluster_additional_security_group_ids = var.cluster_security_group_additional_ids
 
   enable_irsa = true
 
   cluster_addons = {
     coredns = {
-      addon_version            = var.addon_versions.coredns
+      addon_version               = var.addon_versions.coredns
       resolve_conflicts_on_create = "OVERWRITE"
       resolve_conflicts_on_update = "OVERWRITE"
     }
     kube-proxy = {
-      addon_version            = var.addon_versions.kube_proxy
+      addon_version               = var.addon_versions.kube_proxy
       resolve_conflicts_on_create = "OVERWRITE"
       resolve_conflicts_on_update = "OVERWRITE"
     }
     vpc-cni = {
-      addon_version            = var.addon_versions.vpc_cni
+      addon_version               = var.addon_versions.vpc_cni
       resolve_conflicts_on_create = "OVERWRITE"
       resolve_conflicts_on_update = "OVERWRITE"
     }
     eks-pod-identity-agent = {
-      addon_version            = var.addon_versions.pod_identity_agent
+      addon_version               = var.addon_versions.pod_identity_agent
       resolve_conflicts_on_create = "OVERWRITE"
       resolve_conflicts_on_update = "OVERWRITE"
     }

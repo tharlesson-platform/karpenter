@@ -107,9 +107,9 @@ variable "system_node_group" {
 variable "addon_versions" {
   description = "Pinned EKS addon versions compatible with the selected Kubernetes version."
   type = object({
-    coredns           = string
-    kube_proxy        = string
-    vpc_cni           = string
+    coredns            = string
+    kube_proxy         = string
+    vpc_cni            = string
     pod_identity_agent = string
   })
 }

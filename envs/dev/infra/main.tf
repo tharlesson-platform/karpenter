@@ -35,10 +35,10 @@ module "eks" {
 module "network" {
   source = "../../../modules/network"
 
-  cluster_name                  = var.cluster_name
-  private_subnet_ids            = var.private_subnet_ids
-  discovery_security_group_ids  = [module.eks.node_security_group_id, module.eks.cluster_primary_security_group_id]
-  tag_subnets_for_karpenter     = true
+  cluster_name                      = var.cluster_name
+  private_subnet_ids                = var.private_subnet_ids
+  discovery_security_group_ids      = [module.eks.node_security_group_id, module.eks.cluster_primary_security_group_id]
+  tag_subnets_for_karpenter         = true
   tag_security_groups_for_karpenter = true
 }
 

@@ -1,10 +1,10 @@
 locals {
-  oidc_provider_hostpath      = replace(var.oidc_provider_url, "https://", "")
-  service_account_subject     = "system:serviceaccount:${var.karpenter_namespace}:${var.karpenter_service_account_name}"
-  controller_role_name        = coalesce(var.controller_role_name, "${var.cluster_name}-karpenter-controller")
-  node_role_name              = coalesce(var.node_role_name, "${var.cluster_name}-karpenter-node")
-  node_instance_profile_name  = coalesce(var.node_instance_profile_name, "${var.cluster_name}-karpenter-node")
-  interruption_queue_arn      = var.interruption_queue_name == null ? null : "arn:aws:sqs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${var.interruption_queue_name}"
+  oidc_provider_hostpath     = replace(var.oidc_provider_url, "https://", "")
+  service_account_subject    = "system:serviceaccount:${var.karpenter_namespace}:${var.karpenter_service_account_name}"
+  controller_role_name       = coalesce(var.controller_role_name, "${var.cluster_name}-karpenter-controller")
+  node_role_name             = coalesce(var.node_role_name, "${var.cluster_name}-karpenter-node")
+  node_instance_profile_name = coalesce(var.node_instance_profile_name, "${var.cluster_name}-karpenter-node")
+  interruption_queue_arn     = var.interruption_queue_name == null ? null : "arn:aws:sqs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${var.interruption_queue_name}"
 }
 
 data "aws_caller_identity" "current" {}

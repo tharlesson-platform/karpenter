@@ -1,0 +1,14 @@
+# Terraform
+**/.terraform/*
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/crash.log
+**/*.tfvars
+!**/*.tfvars.example
+
+# Local kubeconfig
+kubeconfig
+
+# Rendered manifests
+manifests/rendered/*
+!manifests/rendered/.gitkeep

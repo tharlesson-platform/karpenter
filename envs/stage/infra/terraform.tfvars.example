@@ -1,0 +1,51 @@
+aws_region         = "us-east-1"
+cluster_name       = "eks-karpenter-stage"
+kubernetes_version = "1.30"
+
+vpc_id = "vpc-0123456789abcdef0"
+private_subnet_ids = [
+  "subnet-0aaaa1111bbbb2222",
+  "subnet-03333cccc4444dddd",
+  "subnet-05555eeee6666ffff"
+]
+
+cluster_endpoint_private_access = true
+cluster_endpoint_public_access  = false
+authentication_mode             = "API"
+
+default_tags = {
+  Project    = "platform"
+  ManagedBy  = "terraform"
+  Owner      = "platform-team"
+  CostCenter = "cc-1000"
+  Compliance = "internal"
+}
+
+addon_versions = {
+  coredns            = "v1.11.4-eksbuild.24"
+  kube_proxy         = "v1.30.10-eksbuild.7"
+  vpc_cni            = "v1.19.0-eksbuild.1"
+  pod_identity_agent = "v1.3.8-eksbuild.1"
+}
+
+system_node_group = {
+  name            = "system"
+  desired_size    = 2
+  min_size        = 2
+  max_size        = 4
+  instance_types  = ["m6i.large"]
+  ami_type        = "AL2023_x86_64_STANDARD"
+  disk_size       = 80
+  capacity_type   = "ON_DEMAND"
+  max_unavailable = 1
+  labels = {
+    "node-role.kubernetes.io/system" = "true"
+    "workload-tier"                  = "core"
+  }
+}
+
+karpenter_namespace            = "karpenter"
+karpenter_service_account_name = "karpenter"
+
+# Optional: set only if your organization enforces IAM boundaries.
+# permissions_boundary_arn = "arn:aws:iam::123456789012:policy/permissions-boundary"

@@ -1,0 +1,37 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: karpenter-alerts
+  namespace: monitoring
+  labels:
+    role: alert-rules
+spec:
+  groups:
+    - name: karpenter.rules
+      rules:
+        - alert: KarpenterControllerUnavailable
+          expr: sum(up{namespace="karpenter", pod=~"karpenter-.*"}) < 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Karpenter controller is unavailable
+            description: No healthy Karpenter controller pods were detected for 5 minutes.
+
+        - alert: KarpenterReconcileErrorsHigh
+          expr: sum(rate(controller_runtime_reconcile_total{namespace="karpenter",result="error"}[5m])) > 0.1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Karpenter reconcile errors are elevated
+            description: Karpenter reconciliation errors are above the expected threshold.
+
+        - alert: UnschedulablePodsHigh
+          expr: sum(kube_pod_status_unschedulable{namespace!~"kube-system|karpenter"}) > 20
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Too many unschedulable pods
+            description: More than 20 pods are unschedulable, potentially indicating capacity constraints.

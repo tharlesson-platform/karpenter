@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  TF_INPUT: "false"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.6"
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+
+      - name: Check bash scripts
+        run: |
+          chmod +x scripts/*.sh
+          for file in scripts/*.sh; do
+            bash -n "${file}"
+          done
+
+      - name: Validate modules and environment stacks
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          directories=(
+            modules/eks
+            modules/iam
+            modules/karpenter
+            modules/network
+            envs/dev/infra
+            envs/dev/addons
+            envs/stage/infra
+            envs/stage/addons
+            envs/prod/infra
+            envs/prod/addons
+          )
+
+          for dir in "${directories[@]}"; do
+            echo "==> validating ${dir}"
+            terraform -chdir="${dir}" init -backend=false -input=false -no-color
+            terraform -chdir="${dir}" validate -no-color
+          done
+
+      - name: Verify manifest inputs
+        shell: bash
+        run: |
+          test -f manifests/env/dev.env
+          test -f manifests/env/stage.env
+          test -f manifests/env/prod.env
+          test -f manifests/templates/ec2nodeclass-al2023.yaml.tpl
+          test -f manifests/templates/nodepool-critical.yaml.tpl
+          test -f manifests/templates/nodepool-ondemand.yaml.tpl
+          test -f manifests/templates/nodepool-spot.yaml.tpl

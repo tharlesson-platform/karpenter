@@ -1,0 +1,22 @@
+aws_region = "us-east-1"
+
+infra_state_bucket = "org-terraform-states"
+infra_state_key    = "karpenter/dev/infra/terraform.tfstate"
+infra_state_region = "us-east-1"
+
+karpenter_namespace               = "karpenter"
+karpenter_version                 = "1.8.2"
+controller_replicas               = 2
+controller_log_level              = "info"
+enable_spot_interruption_handling = true
+
+# Optional override if you want a custom values file.
+# helm_values_path = "C:/path/to/helm-values/karpenter-values-dev.yaml"
+
+default_tags = {
+  Project    = "platform"
+  ManagedBy  = "terraform"
+  Owner      = "platform-team"
+  CostCenter = "cc-1000"
+  Compliance = "internal"
+}

@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: critical-api
+  namespace: default
+spec:
+  replicas: 4
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: critical-api
+  template:
+    metadata:
+      labels:
+        app: critical-api
+    spec:
+      nodeSelector:
+        workload-tier: critical
+        capacity-tier: ondemand
+      tolerations:
+        - key: critical-only
+          operator: Equal
+          value: "true"
+          effect: NoSchedule
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: critical-api
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: api
+          image: public.ecr.aws/docker/library/nginx:1.27
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: critical-api
+  namespace: default
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      app: critical-api

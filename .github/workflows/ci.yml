@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - fix/karpenter-isolated-ci-20261105
   pull_request:
 
 permissions:
@@ -12,18 +13,44 @@ permissions:
 
 env:
   TF_INPUT: "false"
+  TF_IN_AUTOMATION: "true"
+  AWS_EC2_METADATA_DISABLED: "true"
+  AWS_SHARED_CREDENTIALS_FILE: /dev/null
+  AWS_CONFIG_FILE: /dev/null
+  SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ["karpenter-run-${{ github.run_id }}"]
+    timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: Verify exact source and isolated guest
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test -f /opt/isolation-base-ready
+          test "$(uname -s)" = Linux
+          test "$(uname -m)" = aarch64
+          test -z "${SSH_AUTH_SOCK:-}"
+          test -z "${LOCAL_ARTIFACT_TOKEN:-}"
+          test -z "${LOCAL_ARTIFACT_URL:-}"
+          mounts=$(findmnt --raw --noheadings --output FSTYPE)
+          test -n "$mounts"
+          if grep -Eq '^(9p|virtiofs)$' <<< "$mounts"; then exit 1; fi
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
-          terraform_version: "1.9.8"
+          terraform_version: "1.15.9"
+          terraform_wrapper: false
 
       - name: Check formatting
         run: terraform fmt -check -recursive

@@ -211,6 +211,23 @@ GitHub Actions now validates:
 - Terraform validation for all modules and environment stacks;
 - required manifest inputs for rendered NodePools and EC2NodeClasses.
 
+### Validação local isolada
+
+O workflow usa uma VM ARM64 efêmera, label exclusiva `karpenter-run-<runID>`,
+checkout do SHA exato e actions fixadas por commit. Terraform 1.15.9 mantém
+as validações dos dez diretórios, sem backend: `init -backend=false` e
+`validate`, além de formatação, sintaxe shell e presença dos manifests.
+Não executa `plan`, `apply`, scripts de deploy ou leitura de estado remoto.
+Esses comandos não demonstram que um ambiente AWS real esteja correto.
+
+O job não recebe credenciais AWS ou de artifacts; metadata EC2 fica desabilitada
+e os arquivos de configuração/credenciais apontam para `/dev/null`. A VM deve
+comprovar seu marker e ausência de mounts do host/agente SSH. Sem fallback
+hosted: o novo perfil precisa de revisão e admissão explícita pelo controlador
+local antes de registrar o runner. Até esse aceite, os jobs aguardam na fila.
+Downloads de Terraform/providers usam apenas fontes públicas. Nenhuma licença,
+cobrança ou alteração em cloud é parte desta migração.
+
 ## Spot interruption handling (implemented)
 
 EventBridge rules forward these events to SQS:

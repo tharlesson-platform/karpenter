@@ -313,3 +313,20 @@ Summarized in `docs/decisions.md`:
 - selector/taint mismatches
 - missing Spot interruption setup
 - controller accidentally scheduled on elastic nodes
+
+## Baseline de segurança dos workloads de referência
+
+Os exemplos aplicáveis usam UID/GID 10001 sem root, seccomp RuntimeDefault,
+capabilities removidas, sem privilege escalation e filesystem raiz somente
+leitura. Quando necessário, /tmp é um emptyDir com limite de 64Mi.
+Esta alteração é validada por renderização e testes locais; não executa
+Terraform apply, kubectl apply, sync Argo CD ou promoção para produção.
+Não comprova compatibilidade de um workload privado real nem operação live.
+
+Os workloads demonstrativos são fixados por digest multiarch. critical-api
+usa nginx-unprivileged na porta 8080, em vez de exigir bind privilegiado na
+porta 80. Clientes externos e Services devem apontar targetPort 8080 antes
+de utilizar esse exemplo. Os seletores, tolerations e PDB são preservados.
+
+Rollback: reverter esta PR com revisão; não alterar clusters ou remover dados
+para reverter somente os arquivos de referência.

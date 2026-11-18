@@ -16,12 +16,24 @@ spec:
       nodeSelector:
         workload-tier: elastic
       containers:
-        - name: inflate
-          image: public.ecr.aws/eks-distro/kubernetes/pause:3.10
-          resources:
-            requests:
-              cpu: 500m
-              memory: 512Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
+      - name: inflate
+        image: public.ecr.aws/eks-distro/kubernetes/pause:3.10@sha256:a6165ebcb21ba53745c5423d93e54d0513a37d275280cd61fc31f54bb6345e8c
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
